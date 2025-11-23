@@ -1,8 +1,30 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { ExamResult, Part2Data, Part3Data, RealExamTopic, ExamMode, Message } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 const MODEL_NAME = 'gemini-2.5-flash';
+
+// Get API key from environment variable (build-time injection) or fallback to default
+// For GitHub Pages deployment, API key will be injected during build via GitHub Secrets
+const getApiKey = (): string => {
+  // First try environment variable (for build-time injection via GitHub Secrets)
+  if (process.env.API_KEY && process.env.API_KEY !== 'undefined' && process.env.API_KEY !== '') {
+    return process.env.API_KEY;
+  }
+  if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'undefined' && process.env.GEMINI_API_KEY !== '') {
+    return process.env.GEMINI_API_KEY;
+  }
+  
+  // Fallback: Use default API key for direct sharing (embedded in build)
+  // This allows friends to use the app without configuration
+  // Note: In production, this should be set via GitHub Secrets
+  return 'AIzaSyBJwZbwagHUbZFKoiArwMI22TmHgEoz9po';
+};
+
+// Get or create AI instance with API key
+const getAI = (): GoogleGenAI => {
+  const apiKey = getApiKey();
+  return new GoogleGenAI({ apiKey });
+};
 
 // --- KNOWLEDGE BASE (Real Exam Mode) ---
 export const REAL_EXAM_TOPICS: RealExamTopic[] = [
@@ -113,6 +135,7 @@ export const GeminiService = {
     };
 
     try {
+      const ai = getAI();
       const response = await ai.models.generateContent({
         model: MODEL_NAME,
         contents: prompt,
@@ -146,6 +169,7 @@ export const GeminiService = {
     };
 
     try {
+      const ai = getAI();
       const response = await ai.models.generateContent({
         model: MODEL_NAME,
         contents: prompt,
@@ -177,6 +201,7 @@ CRITICAL RULES:
 Generate ONLY your opening statement as Candidate B:`;
 
         try {
+             const ai = getAI();
              const response = await ai.models.generateContent({ 
                model: MODEL_NAME, 
                contents: systemInstruction 
@@ -217,6 +242,7 @@ ${userMessages ? `Recent conversation context: ${userMessages}` : ''}
 Now generate ONLY your response as Candidate B (no dialogue format, just your words):`;
 
     try {
+      const ai = getAI();
       const response = await ai.models.generateContent({
         model: MODEL_NAME,
         contents: systemInstruction,
@@ -253,6 +279,7 @@ Now generate ONLY your response as Candidate B (no dialogue format, just your wo
       Return ONLY the question text.
     `;
     try {
+      const ai = getAI();
       const response = await ai.models.generateContent({
         model: MODEL_NAME,
         contents: prompt,
@@ -577,6 +604,7 @@ Now generate ONLY your response as Candidate B (no dialogue format, just your wo
     };
 
     try {
+      const ai = getAI();
       const response = await ai.models.generateContent({
         model: MODEL_NAME,
         contents: prompt,
