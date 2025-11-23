@@ -613,15 +613,23 @@ Now generate ONLY your response as Candidate B (no dialogue format, just your wo
       return JSON.parse(response.text || "{}") as ExamResult;
     } catch (error) {
       console.error("Report Gen Error", error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error("Error details:", errorMessage);
+      
+      // Return a detailed error result
       return {
         totalGrade: "C",
-        part1Feedback: { originalText: "", feedback: "Error", score: 0 },
-        part2Feedback: { originalText: "", feedback: "Error", score: 0 },
-        part3Feedback: { originalText: "", feedback: "Error", score: 0 },
-        part4Feedback: { originalText: "", feedback: "Error", score: 0 },
-        part5Feedback: { originalText: "", feedback: "Error", score: 0 },
-        highFreqErrors: ["Analysis Failed"],
-        generalAdvice: "Please try again."
+        part1Feedback: { 
+          originalText: "", 
+          feedback: `Error generating report: ${errorMessage}. Please check your API key and network connection.`, 
+          score: 0 
+        },
+        part2Feedback: { originalText: "", feedback: "Error: Report generation failed", score: 0 },
+        part3Feedback: { originalText: "", feedback: "Error: Report generation failed", score: 0 },
+        part4Feedback: { originalText: "", feedback: "Error: Report generation failed", score: 0 },
+        part5Feedback: { originalText: "", feedback: "Error: Report generation failed", score: 0 },
+        highFreqErrors: [`Analysis Failed: ${errorMessage}`],
+        generalAdvice: `An error occurred while generating the report. Error: ${errorMessage}. Please check your API key configuration and try again.`
       };
     }
   }

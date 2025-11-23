@@ -937,36 +937,82 @@ const App: React.FC = () => {
         // CRITICAL: Use setMessages with function to get the LATEST messages (after any updates)
         setMessages(finalMessages => {
           console.log("Final messages for report:", finalMessages);
+          console.log("Messages count:", finalMessages.length);
           
-          setStage(ExamStage.REPORT);
+          // Check if we have any messages to generate report
+          if (finalMessages.length === 0) {
+            console.warn("No messages found, cannot generate report");
+            // Still show report with error message
+            setStage(ExamStage.REPORT);
+            setIsViewingHistoryRecord(false);
+            setExamResult({
+              totalGrade: "D",
+              part1Feedback: { originalText: "", feedback: "No responses recorded. Please complete at least one part of the exam.", score: 0 },
+              part2Feedback: { originalText: "", feedback: "No responses recorded.", score: 0 },
+              part3Feedback: { originalText: "", feedback: "No responses recorded.", score: 0 },
+              part4Feedback: { originalText: "", feedback: "No responses recorded.", score: 0 },
+              part5Feedback: { originalText: "", feedback: "No responses recorded.", score: 0 },
+              highFreqErrors: ["No exam data available"],
+              generalAdvice: "Please complete at least one part of the exam before finishing."
+            });
+            return finalMessages;
+          }
+          
+          // Set processing state first
+          setStage(ExamStage.PROCESSING);
+          setIsProcessing(true);
           setIsViewingHistoryRecord(false); // This is a live result
           
-          // Generate Result
+          // Generate Result with error handling
           (async () => {
-            // For practice mode, only evaluate the practiced part
-            const practicePartToEvaluate = (examType === ExamType.PRACTICE && practicePart) ? practicePart : undefined;
-            const res = await GeminiService.generateReport(finalMessages, practicePartToEvaluate);
-            setExamResult(res);
-            
-            // --- AUTO SAVE ---
-            const topicName = examMode === ExamMode.REAL 
-                ? (realTopic?.name || "Unknown Real Topic") 
-                : (part2Data?.topic || "AI Generated Topic");
+            try {
+              console.log("Starting report generation...");
+              // For practice mode, only evaluate the practiced part
+              const practicePartToEvaluate = (examType === ExamType.PRACTICE && practicePart) ? practicePart : undefined;
+              const res = await GeminiService.generateReport(finalMessages, practicePartToEvaluate);
+              console.log("Report generated successfully:", res);
+              
+              setExamResult(res);
+              
+              // --- AUTO SAVE ---
+              const topicName = examMode === ExamMode.REAL 
+                  ? (realTopic?.name || "Unknown Real Topic") 
+                  : (part2Data?.topic || "AI Generated Topic");
 
-            const newRecord: ExamRecord = {
-                id: Math.random().toString(36).substr(2, 9),
-                timestamp: Date.now(),
-                mode: examMode,
-                topicName: topicName,
-                result: res,
-                fullTranscript: finalMessages,
-                examType: examType || undefined,
-                practicePart: (examType === ExamType.PRACTICE && practicePart) ? practicePart : undefined
-            };
-            
-            StorageService.saveRecord(newRecord);
-            console.log("Exam saved successfully with", finalMessages.length, "messages");
-            console.log("Messages content:", finalMessages.map(m => m.text));
+              const newRecord: ExamRecord = {
+                  id: Math.random().toString(36).substr(2, 9),
+                  timestamp: Date.now(),
+                  mode: examMode,
+                  topicName: topicName,
+                  result: res,
+                  fullTranscript: finalMessages,
+                  examType: examType || undefined,
+                  practicePart: (examType === ExamType.PRACTICE && practicePart) ? practicePart : undefined
+              };
+              
+              StorageService.saveRecord(newRecord);
+              console.log("Exam saved successfully with", finalMessages.length, "messages");
+              console.log("Messages content:", finalMessages.map(m => m.text));
+              
+              // Switch to report stage after result is set
+              setStage(ExamStage.REPORT);
+              setIsProcessing(false);
+            } catch (error) {
+              console.error("Error generating report:", error);
+              // Show error in report
+              setExamResult({
+                totalGrade: "C",
+                part1Feedback: { originalText: "", feedback: `Error generating report: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`, score: 0 },
+                part2Feedback: { originalText: "", feedback: "Error", score: 0 },
+                part3Feedback: { originalText: "", feedback: "Error", score: 0 },
+                part4Feedback: { originalText: "", feedback: "Error", score: 0 },
+                part5Feedback: { originalText: "", feedback: "Error", score: 0 },
+                highFreqErrors: ["Report generation failed"],
+                generalAdvice: "An error occurred while generating the report. Please check your API key and try again."
+              });
+              setStage(ExamStage.REPORT);
+              setIsProcessing(false);
+            }
           })();
           
           // Return unchanged (we're just using this to get latest value)
@@ -1492,12 +1538,15 @@ const App: React.FC = () => {
           </div>
       );
 
+      // CRITICAL: Ensure all feedback objects exist with default values to prevent undefined errors
+      const defaultFeedback = { originalText: "", feedback: "No data available", score: 0 };
+      
       const allSections = [
-          { title: "Part 1: Intro", data: examResult.part1Feedback, partKey: 'PART1' },
-          { title: "Part 2: Q&A", data: examResult.part2Feedback, partKey: 'PART2' },
-          { title: "Part 3: Presentation", data: examResult.part3Feedback, partKey: 'PART3' },
-          { title: "Part 4: Discussion", data: examResult.part4Feedback, partKey: 'PART4' },
-          { title: "Part 5: In-Depth", data: examResult.part5Feedback, partKey: 'PART5' },
+          { title: "Part 1: Intro", data: examResult.part1Feedback || defaultFeedback, partKey: 'PART1' },
+          { title: "Part 2: Q&A", data: examResult.part2Feedback || defaultFeedback, partKey: 'PART2' },
+          { title: "Part 3: Presentation", data: examResult.part3Feedback || defaultFeedback, partKey: 'PART3' },
+          { title: "Part 4: Discussion", data: examResult.part4Feedback || defaultFeedback, partKey: 'PART4' },
+          { title: "Part 5: In-Depth", data: examResult.part5Feedback || defaultFeedback, partKey: 'PART5' },
       ];
       
       // Check if this is a practice session and which part was practiced
@@ -1557,8 +1606,14 @@ const App: React.FC = () => {
                      </div>
                  </div>
                  {sections.map((sec, idx) => {
+                     // CRITICAL: Ensure sec.data exists before accessing properties
+                     if (!sec.data) {
+                         console.warn(`Missing data for ${sec.title}`);
+                         sec.data = { originalText: "", feedback: "No data available", score: 0 };
+                     }
+                     
                      // For Part 4, extract full dialogue from messages
-                     let displayText = sec.data.originalText || "No response detected";
+                     let displayText = (sec.data?.originalText || "No response detected");
                      if (sec.partKey === 'PART4') {
                          // Extract all Part 4 messages from the transcript
                          const transcriptToUse = isViewingHistoryRecord ? viewingRecordTranscript : messages;
@@ -1580,7 +1635,7 @@ const App: React.FC = () => {
                                  return text;
                              });
                              displayText = dialogueLines.join('\n');
-                         } else if (sec.data.originalText && (sec.data.originalText.includes('Candidate') || sec.data.originalText.includes('Partner'))) {
+                         } else if (sec.data?.originalText && (sec.data.originalText.includes('Candidate') || sec.data.originalText.includes('Partner'))) {
                              // Use originalText if it already contains dialogue format
                              displayText = sec.data.originalText;
                          }
@@ -1591,12 +1646,12 @@ const App: React.FC = () => {
                          <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
                              <h3 className="font-bold text-slate-700">{sec.title}</h3>
                              <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                                 sec.data.score >= 13 ? 'bg-green-100 text-green-700' : 
-                                 sec.data.score >= 10 ? 'bg-blue-100 text-blue-700' : 
-                                 sec.data.score >= 7 ? 'bg-yellow-100 text-yellow-700' : 
+                                 (sec.data?.score || 0) >= 13 ? 'bg-green-100 text-green-700' : 
+                                 (sec.data?.score || 0) >= 10 ? 'bg-blue-100 text-blue-700' : 
+                                 (sec.data?.score || 0) >= 7 ? 'bg-yellow-100 text-yellow-700' : 
                                  'bg-red-100 text-red-700'
                              }`}>
-                                 Score: {sec.data.score}/15
+                                 Score: {sec.data?.score || 0}/15
                              </span>
                          </div>
                          <div className="p-6 space-y-4">
@@ -1637,7 +1692,7 @@ const App: React.FC = () => {
                                  
                                  {/* Parse and display three dimensions separately */}
                                  {(() => {
-                                     const feedback = sec.data.feedback || '';
+                                     const feedback = sec.data?.feedback || '';
                                      
                                      // Helper function to extract dimension content
                                      const extractDimension = (text: string, patterns: string[]): string | null => {
