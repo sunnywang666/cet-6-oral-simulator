@@ -1148,7 +1148,19 @@ const App: React.FC = () => {
                           <div className="flex items-center gap-2 w-full sm:w-auto">
                               <button 
                                 onClick={() => {
-                                    setExamResult(record.result);
+                                    // CRITICAL: Ensure record.result has all required fields with defaults
+                                    const defaultFeedback = { originalText: "", feedback: "No data available", score: 0 };
+                                    const safeResult = {
+                                        totalGrade: record.result?.totalGrade || 'C',
+                                        part1Feedback: record.result?.part1Feedback || defaultFeedback,
+                                        part2Feedback: record.result?.part2Feedback || defaultFeedback,
+                                        part3Feedback: record.result?.part3Feedback || defaultFeedback,
+                                        part4Feedback: record.result?.part4Feedback || defaultFeedback,
+                                        part5Feedback: record.result?.part5Feedback || defaultFeedback,
+                                        highFreqErrors: record.result?.highFreqErrors || [],
+                                        generalAdvice: record.result?.generalAdvice || "No advice available."
+                                    };
+                                    setExamResult(safeResult);
                                     setIsViewingHistoryRecord(true);
                                     setViewingRecordTranscript(record.fullTranscript || []);
                                     // CRITICAL: Restore examType and practicePart from record for proper filtering
@@ -1541,12 +1553,24 @@ const App: React.FC = () => {
       // CRITICAL: Ensure all feedback objects exist with default values to prevent undefined errors
       const defaultFeedback = { originalText: "", feedback: "No data available", score: 0 };
       
+      // CRITICAL: Normalize examResult to ensure all fields exist
+      const safeExamResult = {
+          totalGrade: examResult.totalGrade || 'C',
+          part1Feedback: examResult.part1Feedback || defaultFeedback,
+          part2Feedback: examResult.part2Feedback || defaultFeedback,
+          part3Feedback: examResult.part3Feedback || defaultFeedback,
+          part4Feedback: examResult.part4Feedback || defaultFeedback,
+          part5Feedback: examResult.part5Feedback || defaultFeedback,
+          highFreqErrors: examResult.highFreqErrors || [],
+          generalAdvice: examResult.generalAdvice || "No advice available."
+      };
+      
       const allSections = [
-          { title: "Part 1: Intro", data: examResult.part1Feedback || defaultFeedback, partKey: 'PART1' },
-          { title: "Part 2: Q&A", data: examResult.part2Feedback || defaultFeedback, partKey: 'PART2' },
-          { title: "Part 3: Presentation", data: examResult.part3Feedback || defaultFeedback, partKey: 'PART3' },
-          { title: "Part 4: Discussion", data: examResult.part4Feedback || defaultFeedback, partKey: 'PART4' },
-          { title: "Part 5: In-Depth", data: examResult.part5Feedback || defaultFeedback, partKey: 'PART5' },
+          { title: "Part 1: Intro", data: safeExamResult.part1Feedback, partKey: 'PART1' },
+          { title: "Part 2: Q&A", data: safeExamResult.part2Feedback, partKey: 'PART2' },
+          { title: "Part 3: Presentation", data: safeExamResult.part3Feedback, partKey: 'PART3' },
+          { title: "Part 4: Discussion", data: safeExamResult.part4Feedback, partKey: 'PART4' },
+          { title: "Part 5: In-Depth", data: safeExamResult.part5Feedback, partKey: 'PART5' },
       ];
       
       // Check if this is a practice session and which part was practiced
@@ -1572,12 +1596,12 @@ const App: React.FC = () => {
                           {isViewingHistoryRecord ? 'Historical Report' : 'Exam Report'}
                       </h1>
                       <p className="text-slate-500 mt-2">Overall Grade</p>
-                      <div className="text-6xl font-black text-blue-600 mt-1">{examResult.totalGrade}</div>
+                      <div className="text-6xl font-black text-blue-600 mt-1">{safeExamResult.totalGrade}</div>
                   </div>
                   <div className="mt-6 md:mt-0 max-w-md">
                       <h4 className="font-bold text-red-500 flex items-center gap-2 mb-2"><AlertCircle size={18}/> High Frequency Errors</h4>
                       <ul className="list-disc list-inside text-sm text-slate-600 bg-red-50 p-4 rounded-lg">
-                          {examResult.highFreqErrors?.map((err, i) => <li key={i}>{err}</li>)}
+                          {safeExamResult.highFreqErrors?.map((err, i) => <li key={i}>{err}</li>)}
                       </ul>
                   </div>
              </div>
@@ -1606,14 +1630,22 @@ const App: React.FC = () => {
                      </div>
                  </div>
                  {sections.map((sec, idx) => {
-                     // CRITICAL: Ensure sec.data exists before accessing properties
+                     // CRITICAL: Ensure sec.data exists and has all required properties
+                     const defaultFeedback = { originalText: "", feedback: "No data available", score: 0 };
                      if (!sec.data) {
                          console.warn(`Missing data for ${sec.title}`);
-                         sec.data = { originalText: "", feedback: "No data available", score: 0 };
+                         sec.data = defaultFeedback;
+                     } else {
+                         // Ensure all properties exist
+                         sec.data = {
+                             originalText: sec.data.originalText || "",
+                             feedback: sec.data.feedback || "No feedback available",
+                             score: sec.data.score ?? 0
+                         };
                      }
                      
                      // For Part 4, extract full dialogue from messages
-                     let displayText = (sec.data?.originalText || "No response detected");
+                     let displayText = (sec.data.originalText || "No response detected");
                      if (sec.partKey === 'PART4') {
                          // Extract all Part 4 messages from the transcript
                          const transcriptToUse = isViewingHistoryRecord ? viewingRecordTranscript : messages;
@@ -1768,7 +1800,7 @@ const App: React.FC = () => {
 
              <div className="bg-blue-50 rounded-xl p-6 border border-blue-100">
                  <h3 className="font-bold text-blue-800 mb-2">General Advice</h3>
-                 <p className="text-blue-700">{examResult.generalAdvice}</p>
+                 <p className="text-blue-700">{safeExamResult.generalAdvice}</p>
              </div>
 
              {!isViewingHistoryRecord && (
