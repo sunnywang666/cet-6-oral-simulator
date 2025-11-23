@@ -947,11 +947,46 @@ const App: React.FC = () => {
             setIsViewingHistoryRecord(false);
             setExamResult({
               totalGrade: "D",
-              part1Feedback: { originalText: "", feedback: "No responses recorded. Please complete at least one part of the exam.", score: 0 },
-              part2Feedback: { originalText: "", feedback: "No responses recorded.", score: 0 },
-              part3Feedback: { originalText: "", feedback: "No responses recorded.", score: 0 },
-              part4Feedback: { originalText: "", feedback: "No responses recorded.", score: 0 },
-              part5Feedback: { originalText: "", feedback: "No responses recorded.", score: 0 },
+              part1Feedback: { 
+                originalText: "", 
+                feedback: "No responses recorded. Please complete at least one part of the exam.", 
+                score: 0,
+                accuracyScore: undefined,
+                coherenceScore: undefined,
+                flexibilityScore: undefined
+              },
+              part2Feedback: { 
+                originalText: "", 
+                feedback: "No responses recorded.", 
+                score: 0,
+                accuracyScore: undefined,
+                coherenceScore: undefined,
+                flexibilityScore: undefined
+              },
+              part3Feedback: { 
+                originalText: "", 
+                feedback: "No responses recorded.", 
+                score: 0,
+                accuracyScore: undefined,
+                coherenceScore: undefined,
+                flexibilityScore: undefined
+              },
+              part4Feedback: { 
+                originalText: "", 
+                feedback: "No responses recorded.", 
+                score: 0,
+                accuracyScore: undefined,
+                coherenceScore: undefined,
+                flexibilityScore: undefined
+              },
+              part5Feedback: { 
+                originalText: "", 
+                feedback: "No responses recorded.", 
+                score: 0,
+                accuracyScore: undefined,
+                coherenceScore: undefined,
+                flexibilityScore: undefined
+              },
               highFreqErrors: ["No exam data available"],
               generalAdvice: "Please complete at least one part of the exam before finishing."
             });
@@ -1149,7 +1184,14 @@ const App: React.FC = () => {
                               <button 
                                 onClick={() => {
                                     // CRITICAL: Ensure record.result has all required fields with defaults
-                                    const defaultFeedback = { originalText: "", feedback: "No data available", score: 0 };
+                                    const defaultFeedback = { 
+                                        originalText: "", 
+                                        feedback: "No data available", 
+                                        score: 0,
+                                        accuracyScore: undefined,
+                                        coherenceScore: undefined,
+                                        flexibilityScore: undefined
+                                    };
                                     const safeResult = {
                                         totalGrade: record.result?.totalGrade || 'C',
                                         part1Feedback: record.result?.part1Feedback || defaultFeedback,
@@ -1551,7 +1593,14 @@ const App: React.FC = () => {
       );
 
       // CRITICAL: Ensure all feedback objects exist with default values to prevent undefined errors
-      const defaultFeedback = { originalText: "", feedback: "No data available", score: 0 };
+      const defaultFeedback = { 
+          originalText: "", 
+          feedback: "No data available", 
+          score: 0,
+          accuracyScore: undefined,
+          coherenceScore: undefined,
+          flexibilityScore: undefined
+      };
       
       // CRITICAL: Normalize examResult to ensure all fields exist
       const safeExamResult = {
@@ -1631,7 +1680,14 @@ const App: React.FC = () => {
                  </div>
                  {sections.map((sec, idx) => {
                      // CRITICAL: Ensure sec.data exists and has all required properties
-                     const defaultFeedback = { originalText: "", feedback: "No data available", score: 0 };
+                     const defaultFeedback = { 
+                         originalText: "", 
+                         feedback: "No data available", 
+                         score: 0,
+                         accuracyScore: undefined,
+                         coherenceScore: undefined,
+                         flexibilityScore: undefined
+                     };
                      if (!sec.data) {
                          console.warn(`Missing data for ${sec.title}`);
                          sec.data = defaultFeedback;
@@ -1640,7 +1696,10 @@ const App: React.FC = () => {
                          sec.data = {
                              originalText: sec.data.originalText || "",
                              feedback: sec.data.feedback || "No feedback available",
-                             score: sec.data.score ?? 0
+                             score: sec.data.score ?? 0,
+                             accuracyScore: sec.data.accuracyScore,
+                             coherenceScore: sec.data.coherenceScore,
+                             flexibilityScore: sec.data.flexibilityScore
                          };
                      }
                      
@@ -1749,33 +1808,59 @@ const App: React.FC = () => {
                                      const coherenceText = extractDimension(feedback, coherencePatterns);
                                      const flexibilityText = extractDimension(feedback, flexibilityPatterns);
                                      
+                                     // Get dimension scores from sec.data
+                                     const accuracyScore = sec.data?.accuracyScore ?? null;
+                                     const coherenceScore = sec.data?.coherenceScore ?? null;
+                                     const flexibilityScore = sec.data?.flexibilityScore ?? null;
+                                     
                                      // If we found at least one dimension, display them separately
                                      if (accuracyText || coherenceText || flexibilityText) {
                                          return (
                                              <div className="space-y-3">
                                                  {accuracyText && (
                                                      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg shadow-sm">
-                                                         <div className="flex items-center gap-2 mb-2">
-                                                             <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                                             <p className="font-bold text-blue-700 text-sm">准确性 (Accuracy and Range)</p>
+                                                         <div className="flex items-center justify-between mb-2">
+                                                             <div className="flex items-center gap-2">
+                                                                 <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                                                 <p className="font-bold text-blue-700 text-sm">准确性 (Accuracy and Range)</p>
+                                                             </div>
+                                                             {accuracyScore !== null && (
+                                                                 <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-bold">
+                                                                     {accuracyScore}/5
+                                                                 </span>
+                                                             )}
                                                          </div>
                                                          <p className="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">{accuracyText}</p>
                                                      </div>
                                                  )}
                                                  {coherenceText && (
                                                      <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg shadow-sm">
-                                                         <div className="flex items-center gap-2 mb-2">
-                                                             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                                             <p className="font-bold text-green-700 text-sm">连贯性 (Size and Coherence)</p>
+                                                         <div className="flex items-center justify-between mb-2">
+                                                             <div className="flex items-center gap-2">
+                                                                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                                                 <p className="font-bold text-green-700 text-sm">连贯性 (Size and Coherence)</p>
+                                                             </div>
+                                                             {coherenceScore !== null && (
+                                                                 <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-bold">
+                                                                     {coherenceScore}/5
+                                                                 </span>
+                                                             )}
                                                          </div>
                                                          <p className="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">{coherenceText}</p>
                                                      </div>
                                                  )}
                                                  {flexibilityText && (
                                                      <div className="bg-purple-50 border-l-4 border-purple-500 p-4 rounded-r-lg shadow-sm">
-                                                         <div className="flex items-center gap-2 mb-2">
-                                                             <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                                                             <p className="font-bold text-purple-700 text-sm">互动性 (Flexibility and Appropriateness)</p>
+                                                         <div className="flex items-center justify-between mb-2">
+                                                             <div className="flex items-center gap-2">
+                                                                 <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                                                                 <p className="font-bold text-purple-700 text-sm">互动性 (Flexibility and Appropriateness)</p>
+                                                             </div>
+                                                             {flexibilityScore !== null && (
+                                                                 <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-bold">
+                                                                     {flexibilityScore}/5
+                                                                 </span>
+                                                             )}
                                                          </div>
                                                          <p className="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">{flexibilityText}</p>
                                                      </div>

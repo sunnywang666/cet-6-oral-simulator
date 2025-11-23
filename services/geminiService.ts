@@ -447,11 +447,14 @@ Now generate ONLY your response as Candidate B (no dialogue format, just your wo
            * Typical scores: 10-13 points for adequate responses, 13-15 for excellent ones.` : ''}
       2. For other parts, set score to 0, originalText to "", and feedback to "Not practiced in this session".
       3. In the feedback for ${partNames[partNumber]}, clearly explain performance in each dimension using this EXACT format:
-         Accuracy and Range: [specific feedback on grammar, vocabulary, pronunciation]
-         Size and Coherence: [specific feedback on speaking length, fluency, pauses]
-         Flexibility and Appropriateness: [specific feedback on interaction, adaptability, appropriateness]
+         Accuracy and Range: [specific feedback on grammar, vocabulary, pronunciation] (Score: X/5)
+         Size and Coherence: [specific feedback on speaking length, fluency, pauses] (Score: X/5)
+         Flexibility and Appropriateness: [specific feedback on interaction, adaptability, appropriateness] (Score: X/5)
          
-         IMPORTANT: Use the exact labels "Accuracy and Range:", "Size and Coherence:", and "Flexibility and Appropriateness:" at the start of each section. Put each dimension on a new line.
+         IMPORTANT: 
+         - Use the exact labels "Accuracy and Range:", "Size and Coherence:", and "Flexibility and Appropriateness:" at the start of each section. Put each dimension on a new line.
+         - Include the score for each dimension in the format "(Score: X/5)" where X is a number from 0 to 5.
+         - Also provide accuracyScore, coherenceScore, and flexibilityScore as separate numeric fields (0-5) in the JSON response.
       4. Identify High Frequency Errors from ${partNames[partNumber]} (e.g., "She/He confusion", "Tense inconsistency", "Word repetition").
       5. Give an overall grade (A+, A, B, C, D) based ONLY on ${partNames[partNumber]} performance:
          - A+ or A: 13-15 points (Deep, clear, detailed)
@@ -534,11 +537,14 @@ Now generate ONLY your response as Candidate B (no dialogue format, just your wo
            * Typical scores: 10-13 points for adequate responses, 13-15 for excellent ones.
       
       2. For each part's feedback, clearly explain performance in each dimension using this EXACT format:
-         Accuracy and Range: [specific feedback on grammar, vocabulary, pronunciation]
-         Size and Coherence: [specific feedback on speaking length, fluency, pauses]
-         Flexibility and Appropriateness: [specific feedback on interaction, adaptability, appropriateness]
+         Accuracy and Range: [specific feedback on grammar, vocabulary, pronunciation] (Score: X/5)
+         Size and Coherence: [specific feedback on speaking length, fluency, pauses] (Score: X/5)
+         Flexibility and Appropriateness: [specific feedback on interaction, adaptability, appropriateness] (Score: X/5)
          
-         IMPORTANT: Use the exact labels "Accuracy and Range:", "Size and Coherence:", and "Flexibility and Appropriateness:" at the start of each section. Put each dimension on a new line.
+         IMPORTANT: 
+         - Use the exact labels "Accuracy and Range:", "Size and Coherence:", and "Flexibility and Appropriateness:" at the start of each section. Put each dimension on a new line.
+         - Include the score for each dimension in the format "(Score: X/5)" where X is a number from 0 to 5.
+         - Also provide accuracyScore, coherenceScore, and flexibilityScore as separate numeric fields (0-5) in the JSON response for each part.
       
       3. Identify High Frequency Errors across all parts (e.g., "She/He confusion", "Tense inconsistency", "Word repetition", "Inappropriate pauses").
       
@@ -563,7 +569,10 @@ Now generate ONLY your response as Candidate B (no dialogue format, just your wo
           properties: {
             originalText: { type: Type.STRING },
             feedback: { type: Type.STRING },
-            score: { type: Type.INTEGER }
+            score: { type: Type.INTEGER },
+            accuracyScore: { type: Type.INTEGER },
+            coherenceScore: { type: Type.INTEGER },
+            flexibilityScore: { type: Type.INTEGER }
           }
         },
         part2Feedback: {
@@ -571,7 +580,10 @@ Now generate ONLY your response as Candidate B (no dialogue format, just your wo
           properties: {
             originalText: { type: Type.STRING },
             feedback: { type: Type.STRING },
-            score: { type: Type.INTEGER }
+            score: { type: Type.INTEGER },
+            accuracyScore: { type: Type.INTEGER },
+            coherenceScore: { type: Type.INTEGER },
+            flexibilityScore: { type: Type.INTEGER }
           }
         },
         part3Feedback: {
@@ -579,7 +591,10 @@ Now generate ONLY your response as Candidate B (no dialogue format, just your wo
           properties: {
             originalText: { type: Type.STRING },
             feedback: { type: Type.STRING },
-            score: { type: Type.INTEGER }
+            score: { type: Type.INTEGER },
+            accuracyScore: { type: Type.INTEGER },
+            coherenceScore: { type: Type.INTEGER },
+            flexibilityScore: { type: Type.INTEGER }
           }
         },
         part4Feedback: {
@@ -587,7 +602,10 @@ Now generate ONLY your response as Candidate B (no dialogue format, just your wo
           properties: {
             originalText: { type: Type.STRING },
             feedback: { type: Type.STRING },
-            score: { type: Type.INTEGER }
+            score: { type: Type.INTEGER },
+            accuracyScore: { type: Type.INTEGER },
+            coherenceScore: { type: Type.INTEGER },
+            flexibilityScore: { type: Type.INTEGER }
           }
         },
         part5Feedback: {
@@ -595,7 +613,10 @@ Now generate ONLY your response as Candidate B (no dialogue format, just your wo
           properties: {
             originalText: { type: Type.STRING },
             feedback: { type: Type.STRING },
-            score: { type: Type.INTEGER }
+            score: { type: Type.INTEGER },
+            accuracyScore: { type: Type.INTEGER },
+            coherenceScore: { type: Type.INTEGER },
+            flexibilityScore: { type: Type.INTEGER }
           }
         },
         highFreqErrors: { type: Type.ARRAY, items: { type: Type.STRING } },
@@ -622,12 +643,43 @@ Now generate ONLY your response as Candidate B (no dialogue format, just your wo
         part1Feedback: { 
           originalText: "", 
           feedback: `Error generating report: ${errorMessage}. Please check your API key and network connection.`, 
-          score: 0 
+          score: 0,
+          accuracyScore: undefined,
+          coherenceScore: undefined,
+          flexibilityScore: undefined
         },
-        part2Feedback: { originalText: "", feedback: "Error: Report generation failed", score: 0 },
-        part3Feedback: { originalText: "", feedback: "Error: Report generation failed", score: 0 },
-        part4Feedback: { originalText: "", feedback: "Error: Report generation failed", score: 0 },
-        part5Feedback: { originalText: "", feedback: "Error: Report generation failed", score: 0 },
+        part2Feedback: { 
+          originalText: "", 
+          feedback: "Error: Report generation failed", 
+          score: 0,
+          accuracyScore: undefined,
+          coherenceScore: undefined,
+          flexibilityScore: undefined
+        },
+        part3Feedback: { 
+          originalText: "", 
+          feedback: "Error: Report generation failed", 
+          score: 0,
+          accuracyScore: undefined,
+          coherenceScore: undefined,
+          flexibilityScore: undefined
+        },
+        part4Feedback: { 
+          originalText: "", 
+          feedback: "Error: Report generation failed", 
+          score: 0,
+          accuracyScore: undefined,
+          coherenceScore: undefined,
+          flexibilityScore: undefined
+        },
+        part5Feedback: { 
+          originalText: "", 
+          feedback: "Error: Report generation failed", 
+          score: 0,
+          accuracyScore: undefined,
+          coherenceScore: undefined,
+          flexibilityScore: undefined
+        },
         highFreqErrors: [`Analysis Failed: ${errorMessage}`],
         generalAdvice: `An error occurred while generating the report. Error: ${errorMessage}. Please check your API key configuration and try again.`
       };

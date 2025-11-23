@@ -72,7 +72,10 @@ export interface Part3Data {
 export interface SectionFeedback {
   originalText: string;
   feedback: string; 
-  score: number; 
+  score: number; // Total score (0-15)
+  accuracyScore?: number; // Accuracy and Range score (0-5)
+  coherenceScore?: number; // Size and Coherence score (0-5)
+  flexibilityScore?: number; // Flexibility and Appropriateness score (0-5)
 }
 
 export interface ExamResult {
