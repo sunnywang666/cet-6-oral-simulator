@@ -1,0 +1,7 @@
+{
+  "name": "CET-6 Oral Simulator",
+  "description": "A focused simulator for the CET-6 Spoken English exam using AI to act as examiner and discussion partner.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
