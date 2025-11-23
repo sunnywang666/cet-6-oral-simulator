@@ -1037,11 +1037,46 @@ const App: React.FC = () => {
               // Show error in report
               setExamResult({
                 totalGrade: "C",
-                part1Feedback: { originalText: "", feedback: `Error generating report: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`, score: 0 },
-                part2Feedback: { originalText: "", feedback: "Error", score: 0 },
-                part3Feedback: { originalText: "", feedback: "Error", score: 0 },
-                part4Feedback: { originalText: "", feedback: "Error", score: 0 },
-                part5Feedback: { originalText: "", feedback: "Error", score: 0 },
+                part1Feedback: { 
+                  originalText: "", 
+                  feedback: `Error generating report: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`, 
+                  score: 0,
+                  accuracyScore: undefined,
+                  coherenceScore: undefined,
+                  flexibilityScore: undefined
+                },
+                part2Feedback: { 
+                  originalText: "", 
+                  feedback: "Error", 
+                  score: 0,
+                  accuracyScore: undefined,
+                  coherenceScore: undefined,
+                  flexibilityScore: undefined
+                },
+                part3Feedback: { 
+                  originalText: "", 
+                  feedback: "Error", 
+                  score: 0,
+                  accuracyScore: undefined,
+                  coherenceScore: undefined,
+                  flexibilityScore: undefined
+                },
+                part4Feedback: { 
+                  originalText: "", 
+                  feedback: "Error", 
+                  score: 0,
+                  accuracyScore: undefined,
+                  coherenceScore: undefined,
+                  flexibilityScore: undefined
+                },
+                part5Feedback: { 
+                  originalText: "", 
+                  feedback: "Error", 
+                  score: 0,
+                  accuracyScore: undefined,
+                  coherenceScore: undefined,
+                  flexibilityScore: undefined
+                },
                 highFreqErrors: ["Report generation failed"],
                 generalAdvice: "An error occurred while generating the report. Please check your API key and try again."
               });
