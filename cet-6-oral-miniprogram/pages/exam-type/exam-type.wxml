@@ -1,0 +1,30 @@
+<!--pages/exam-type/exam-type.wxml-->
+<view class="container">
+  <view class="header">
+    <view class="title">选择考试类型</view>
+    <view class="subtitle">请选择您想要进行的考试类型</view>
+  </view>
+
+  <view class="type-cards">
+    <view class="type-card {{selectedType === 'FULL_EXAM' ? 'selected' : ''}}" bindtap="selectType" data-type="FULL_EXAM">
+      <view class="type-icon">📋</view>
+      <view class="type-title">完整考试</view>
+      <view class="type-desc">完成全部 5 个部分的考试</view>
+    </view>
+
+    <view class="type-card {{selectedType === 'PRACTICE' ? 'selected' : ''}}" bindtap="selectType" data-type="PRACTICE">
+      <view class="type-icon">🎯</view>
+      <view class="type-title">专项特训</view>
+      <view class="type-desc">针对单个部分进行练习</view>
+    </view>
+  </view>
+
+  <view class="action-buttons">
+    <button class="btn btn-primary" bindtap="confirmType" disabled="{{!selectedType}}">
+      <text>确认选择</text>
+    </button>
+  </view>
+</view>
+
+
+

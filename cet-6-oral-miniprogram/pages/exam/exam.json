@@ -1,0 +1,9 @@
+{
+  "usingComponents": {
+    "timer": "/components/timer/timer",
+    "visualizer": "/components/visualizer/visualizer"
+  }
+}
+
+
+

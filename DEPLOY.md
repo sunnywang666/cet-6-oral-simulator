@@ -2,20 +2,31 @@
 
 ## 🚨 重要安全提示
 
-**API Key 安全警告**：当前的实现将 API Key 直接嵌入到前端代码中，这在公开部署时**不安全**。任何人都可以在浏览器中查看你的 API Key。
+**当前状态**：项目已配置使用 GitHub Secrets 方案，API Key 在构建时从 GitHub Secrets 注入，不会暴露在源代码中。
 
 ### 解决方案
 
-#### 方案 1：使用 GitHub Secrets（推荐用于 GitHub Pages）
+#### 方案 1：使用 GitHub Secrets（✅ 已实现，推荐用于 GitHub Pages）
+
+**这是当前项目使用的方案，已配置完成！**
 
 1. 在 GitHub 仓库设置中添加 Secret：
    - 进入仓库 → Settings → Secrets and variables → Actions
    - 点击 "New repository secret"
    - Name: `GEMINI_API_KEY`
-   - Value: 你的 API Key
+   - Value: 你的 Gemini API Key（例如：`AIzaSyCA7YGsUo95mqKn6zzsT0i5GQypTodEFUM`）
    - 点击 "Add secret"
 
-2. GitHub Actions 会自动在构建时注入 API Key
+2. GitHub Actions 会自动在构建时注入 API Key：
+   - 工作流文件 `.github/workflows/deploy.yml` 已配置
+   - 构建时会从 GitHub Secrets 读取 `GEMINI_API_KEY`
+   - 如果未设置 Secret，会使用默认的 fallback API Key
+   - API Key 在构建时注入到代码中，不会暴露在源代码中
+
+3. 验证配置：
+   - 推送代码后，GitHub Actions 会自动运行
+   - 检查 Actions 标签页，确保构建成功
+   - 部署后访问网站，测试 API 是否正常工作
 
 #### 方案 2：让用户自己配置 API Key（最安全）
 
@@ -43,9 +54,16 @@
 ### 步骤 3：配置 GitHub Secrets（用于自动部署）
 
 1. 进入仓库 → Settings → Secrets and variables → Actions
-2. 添加 Secret：
-   - Name: `GEMINI_API_KEY`
-   - Value: 你的 Gemini API Key
+2. 点击 "New repository secret"
+3. 添加 Secret：
+   - **Name**: `GEMINI_API_KEY`（必须完全一致）
+   - **Value**: 你的 Gemini API Key
+   - 点击 "Add secret"
+
+**重要提示**：
+- Secret 名称必须为 `GEMINI_API_KEY`（与工作流文件中的配置一致）
+- 如果未设置 Secret，构建时会使用默认的 fallback API Key
+- Secret 只在构建时使用，不会暴露在公开的代码中
 
 ### 步骤 4：推送代码
 
@@ -88,10 +106,12 @@ npm run build
 ## 📝 注意事项
 
 1. **API Key 安全**：
+   - ✅ **已实现**：使用 GitHub Secrets 在构建时注入 API Key
+   - ✅ 工作流文件已配置：`.github/workflows/deploy.yml`
+   - ✅ Vite 配置已设置：`vite.config.ts` 会读取 `GEMINI_API_KEY` 环境变量
    - ❌ 不要将 `.env.local` 提交到 Git
-   - ❌ 不要在代码中硬编码 API Key
-   - ✅ 使用 GitHub Secrets 或环境变量
-   - ✅ 考虑让用户自己输入 API Key
+   - ❌ 不要在代码中硬编码 API Key（fallback key 仅用于开发测试）
+   - 💡 可选：考虑让用户自己输入 API Key（最安全）
 
 2. **仓库名称**：
    - 如果仓库名不是 `cet-6-oral-simulator`，需要修改 `vite.config.ts` 中的 `base` 路径

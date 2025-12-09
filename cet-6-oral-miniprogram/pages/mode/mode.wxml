@@ -1,0 +1,30 @@
+<!--pages/mode/mode.wxml-->
+<view class="container">
+  <view class="header">
+    <view class="title">选择考试模式</view>
+    <view class="subtitle">请选择您想要使用的考试模式</view>
+  </view>
+
+  <view class="mode-cards">
+    <view class="mode-card {{selectedMode === 'REAL' ? 'selected' : ''}}" bindtap="selectMode" data-mode="REAL">
+      <view class="mode-icon">📚</view>
+      <view class="mode-title">真题模式</view>
+      <view class="mode-desc">使用官方真题题库进行练习</view>
+    </view>
+
+    <view class="mode-card {{selectedMode === 'SIMULATION' ? 'selected' : ''}}" bindtap="selectMode" data-mode="SIMULATION">
+      <view class="mode-icon">🤖</view>
+      <view class="mode-title">AI 出题</view>
+      <view class="mode-desc">AI 智能生成个性化题目</view>
+    </view>
+  </view>
+
+  <view class="action-buttons">
+    <button class="btn btn-primary" bindtap="confirmMode" disabled="{{!selectedMode}}">
+      <text>确认选择</text>
+    </button>
+  </view>
+</view>
+
+
+

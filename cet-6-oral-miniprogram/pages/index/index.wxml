@@ -1,0 +1,50 @@
+<!--pages/index/index.wxml-->
+<view class="container">
+  <view class="header">
+    <view class="title">CET-6 口语考试模拟器</view>
+    <view class="subtitle">专业口语训练，智能评分反馈</view>
+  </view>
+
+  <view class="content">
+    <view class="card main-card">
+      <view class="icon-wrapper">
+        <text class="icon">🎤</text>
+      </view>
+      <view class="description">
+        <text>模拟真实 CET-6 口语考试环境</text>
+        <text>AI 智能评分，专业反馈建议</text>
+      </view>
+    </view>
+
+    <view class="action-buttons">
+      <button class="btn btn-primary" bindtap="startExam">
+        <text>开始考试</text>
+      </button>
+      <button class="btn btn-secondary" bindtap="viewHistory">
+        <text>历史记录</text>
+      </button>
+    </view>
+
+    <view class="features">
+      <view class="feature-item">
+        <text class="feature-icon">📝</text>
+        <text class="feature-text">完整考试流程</text>
+      </view>
+      <view class="feature-item">
+        <text class="feature-icon">🎯</text>
+        <text class="feature-text">专项特训模式</text>
+      </view>
+      <view class="feature-item">
+        <text class="feature-icon">📊</text>
+        <text class="feature-text">智能评分系统</text>
+      </view>
+      <view class="feature-item">
+        <text class="feature-icon">💾</text>
+        <text class="feature-text">历史记录保存</text>
+      </view>
+    </view>
+  </view>
+</view>
+
+
+

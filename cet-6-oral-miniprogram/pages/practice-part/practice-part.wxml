@@ -1,0 +1,48 @@
+<!--pages/practice-part/practice-part.wxml-->
+<view class="container">
+  <view class="header">
+    <view class="title">选择练习部分</view>
+    <view class="subtitle">请选择您想要练习的部分</view>
+  </view>
+
+  <view class="part-list">
+    <view class="part-item {{selectedPart === 'PART1' ? 'selected' : ''}}" bindtap="selectPart" data-part="PART1">
+      <view class="part-number">Part 1</view>
+      <view class="part-name">自我介绍</view>
+      <view class="part-desc">20秒</view>
+    </view>
+
+    <view class="part-item {{selectedPart === 'PART2' ? 'selected' : ''}}" bindtap="selectPart" data-part="PART2">
+      <view class="part-number">Part 2</view>
+      <view class="part-name">简短问答</view>
+      <view class="part-desc">30秒</view>
+    </view>
+
+    <view class="part-item {{selectedPart === 'PART3' ? 'selected' : ''}}" bindtap="selectPart" data-part="PART3">
+      <view class="part-number">Part 3</view>
+      <view class="part-name">个人陈述</view>
+      <view class="part-desc">准备60秒 + 陈述90秒</view>
+    </view>
+
+    <view class="part-item {{selectedPart === 'PART4' ? 'selected' : ''}}" bindtap="selectPart" data-part="PART4">
+      <view class="part-number">Part 4</view>
+      <view class="part-name">双人讨论</view>
+      <view class="part-desc">180秒</view>
+    </view>
+
+    <view class="part-item {{selectedPart === 'PART5' ? 'selected' : ''}}" bindtap="selectPart" data-part="PART5">
+      <view class="part-number">Part 5</view>
+      <view class="part-name">深入问答</view>
+      <view class="part-desc">45秒</view>
+    </view>
+  </view>
+
+  <view class="action-buttons">
+    <button class="btn btn-primary" bindtap="confirmPart" disabled="{{!selectedPart}}">
+      <text>开始练习</text>
+    </button>
+  </view>
+</view>
+
+
+

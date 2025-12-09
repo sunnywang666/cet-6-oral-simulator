@@ -1,0 +1,11 @@
+<!--components/visualizer/visualizer.wxml-->
+<view class="visualizer-container">
+  <view class="visualizer-bars" wx:if="{{isListening}}">
+    <view class="bar" wx:for="{{bars}}" wx:key="index" style="animation-delay: {{item.delay}}s; animation-duration: {{item.duration}}s;"></view>
+  </view>
+  <text class="visualizer-text" wx:if="{{isListening}}">录音中...</text>
+  <text class="visualizer-text idle" wx:else>麦克风待机</text>
+</view>
+
+
+

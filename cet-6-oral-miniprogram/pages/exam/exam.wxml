@@ -1,0 +1,123 @@
+<!--pages/exam/exam.wxml-->
+<view class="container">
+  <!-- Part 1: Self Introduction -->
+  <view class="exam-section" wx:if="{{stage === 'PART1_SELF_INTRO'}}">
+    <view class="section-header">
+      <text class="section-title">Part 1: Self-Introduction</text>
+      <text class="section-desc">请进行简短的自我介绍</text>
+    </view>
+    <timer duration="{{20}}" isActive="{{isTimerActive}}" label="Speaking Time" bind:finish="handleTimerFinish"></timer>
+    <visualizer isListening="{{isListening}}"></visualizer>
+    <view class="transcript-box">
+      <text class="transcript">{{transcript}}</text>
+    </view>
+    <view class="action-buttons">
+      <button class="btn btn-primary" bindtap="stopRecording" wx:if="{{isListening}}">停止录音</button>
+    </view>
+  </view>
+
+  <!-- Part 2: Short Q&A -->
+  <view class="exam-section" wx:if="{{stage === 'PART2_SHORT_QA'}}">
+    <view class="section-header">
+      <text class="section-title">Part 2: Short Q&A</text>
+      <text class="section-desc">Topic: {{part2Data.topic}}</text>
+      <text class="section-question">{{part2Data.question}}</text>
+    </view>
+    <timer duration="{{30}}" isActive="{{isTimerActive}}" label="Speaking Time" bind:finish="handleTimerFinish"></timer>
+    <visualizer isListening="{{isListening}}"></visualizer>
+    <view class="transcript-box">
+      <text class="transcript">{{transcript}}</text>
+    </view>
+    <view class="action-buttons">
+      <button class="btn btn-primary" bindtap="stopRecording" wx:if="{{isListening}}">停止录音</button>
+    </view>
+  </view>
+
+  <!-- Part 3: Preparation -->
+  <view class="exam-section" wx:if="{{stage === 'PART3_PREP'}}">
+    <view class="section-header">
+      <text class="section-title">Part 3: Individual Presentation</text>
+      <text class="section-desc">准备时间</text>
+    </view>
+    <view class="card-box">
+      <text class="card-title">{{part3Data.title}}</text>
+      <text class="card-quote">{{part3Data.quote}}</text>
+    </view>
+    <timer duration="{{60}}" isActive="{{isTimerActive}}" label="Preparation Time" variant="warning" bind:finish="startPart3Speaking"></timer>
+    <view class="action-buttons">
+      <button class="btn btn-primary" bindtap="startPart3Speaking">开始陈述</button>
+    </view>
+  </view>
+
+  <!-- Part 3: Presentation -->
+  <view class="exam-section" wx:if="{{stage === 'PART3_PRESENTATION'}}">
+    <view class="section-header">
+      <text class="section-title">Part 3: Individual Presentation</text>
+      <text class="section-desc">请开始您的陈述</text>
+    </view>
+    <view class="card-box">
+      <text class="card-title">{{part3Data.title}}</text>
+      <text class="card-quote">{{part3Data.quote}}</text>
+    </view>
+    <timer duration="{{90}}" isActive="{{isTimerActive}}" label="Speaking Time" bind:finish="handleTimerFinish"></timer>
+    <visualizer isListening="{{isListening}}"></visualizer>
+    <view class="transcript-box">
+      <text class="transcript">{{transcript}}</text>
+    </view>
+    <view class="action-buttons">
+      <button class="btn btn-primary" bindtap="stopRecording" wx:if="{{isListening}}">停止录音</button>
+    </view>
+  </view>
+
+  <!-- Part 4: Pair Discussion -->
+  <view class="exam-section" wx:if="{{stage === 'PART4_PAIR_DISCUSSION'}}">
+    <view class="section-header">
+      <text class="section-title">Part 4: Pair Discussion</text>
+      <text class="section-desc">Topic: {{part4Topic}}</text>
+    </view>
+    <timer duration="{{180}}" isActive="{{part4GlobalTimerActive}}" label="Discussion Time" variant="success" bind:finish="handlePart4TimerFinish"></timer>
+    
+    <!-- AI Partner Message -->
+    <view class="message-box ai-message" wx:if="{{currentAIMessage}}">
+      <text class="message-text">{{currentAIMessage}}</text>
+    </view>
+
+    <!-- User Recording -->
+    <view wx:if="{{part4Turn === 'user'}}">
+      <visualizer isListening="{{isListening}}"></visualizer>
+      <view class="transcript-box">
+        <text class="transcript">{{transcript}}</text>
+      </view>
+      <view class="action-buttons">
+        <button class="btn btn-primary" bindtap="stopRecording" wx:if="{{isListening}}">停止录音</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- Part 5: In-depth Q&A -->
+  <view class="exam-section" wx:if="{{stage === 'PART5_IN_DEPTH_QA'}}">
+    <view class="section-header">
+      <text class="section-title">Part 5: In-depth Q&A</text>
+      <text class="section-question">{{part5Question}}</text>
+    </view>
+    <timer duration="{{45}}" isActive="{{isTimerActive}}" label="Speaking Time" bind:finish="handleTimerFinish"></timer>
+    <visualizer isListening="{{isListening}}"></visualizer>
+    <view class="transcript-box">
+      <text class="transcript">{{transcript}}</text>
+    </view>
+    <view class="action-buttons">
+      <button class="btn btn-primary" bindtap="stopRecording" wx:if="{{isListening}}">停止录音</button>
+    </view>
+  </view>
+
+  <!-- Processing -->
+  <view class="exam-section" wx:if="{{stage === 'PROCESSING'}}">
+    <view class="processing-box">
+      <text class="processing-icon">⏳</text>
+      <text class="processing-text">{{processingText}}</text>
+    </view>
+  </view>
+</view>
+
+
+

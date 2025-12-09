@@ -17,7 +17,7 @@ const getApiKey = (): string => {
   // Fallback: Use default API key for direct sharing (embedded in build)
   // This allows friends to use the app without configuration
   // Note: In production, this should be set via GitHub Secrets
-  return 'AIzaSyBJwZbwagHUbZFKoiArwMI22TmHgEoz9po';
+  return 'AIzaSyCA7YGsUo95mqKn6zzsT0i5GQypTodEFUM';
 };
 
 // Get or create AI instance with API key

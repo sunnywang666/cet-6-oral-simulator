@@ -1,0 +1,33 @@
+<!--pages/history/history.wxml-->
+<view class="container">
+  <view class="header">
+    <text class="title">历史记录</text>
+    <text class="subtitle">查看您的考试历史</text>
+  </view>
+
+  <view class="history-list" wx:if="{{records.length > 0}}">
+    <view class="history-item" wx:for="{{records}}" wx:key="id" bindtap="viewRecord" data-id="{{item.id}}">
+      <view class="item-header">
+        <text class="item-date">{{item.dateStr}}</text>
+        <text class="item-grade grade-{{item.gradeClass}}">{{item.result.totalGrade}}</text>
+      </view>
+      <view class="item-content">
+        <text class="item-topic">{{item.topicName}}</text>
+        <text class="item-mode">{{item.modeText}}</text>
+      </view>
+      <view class="item-actions">
+        <button class="btn-view" catchtap="viewRecord" data-id="{{item.id}}">查看</button>
+        <button class="btn-delete" catchtap="deleteRecord" data-id="{{item.id}}">删除</button>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty-state" wx:else>
+    <text class="empty-icon">📝</text>
+    <text class="empty-text">暂无历史记录</text>
+    <button class="btn btn-primary" bindtap="goHome">开始考试</button>
+  </view>
+</view>
+
+
+

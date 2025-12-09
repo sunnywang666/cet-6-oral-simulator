@@ -1,0 +1,91 @@
+/* pages/mode/mode.wxss */
+.container {
+  min-height: 100vh;
+  background: #f8fafc;
+  padding: 40rpx;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 60rpx;
+}
+
+.title {
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #1e293b;
+  margin-bottom: 16rpx;
+}
+
+.subtitle {
+  font-size: 28rpx;
+  color: #64748b;
+}
+
+.mode-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 32rpx;
+  margin-bottom: 60rpx;
+}
+
+.mode-card {
+  background: #ffffff;
+  border-radius: 24rpx;
+  padding: 48rpx;
+  text-align: center;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+  border: 4rpx solid transparent;
+  transition: all 0.3s;
+}
+
+.mode-card.selected {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.mode-icon {
+  font-size: 80rpx;
+  margin-bottom: 24rpx;
+}
+
+.mode-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 16rpx;
+}
+
+.mode-desc {
+  font-size: 26rpx;
+  color: #64748b;
+}
+
+.action-buttons {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 32rpx 40rpx;
+  background: #ffffff;
+  box-shadow: 0 -4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.btn {
+  width: 100%;
+  padding: 28rpx;
+  border-radius: 16rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: #ffffff;
+  border: none;
+}
+
+.btn[disabled] {
+  background: #cbd5e1;
+  color: #94a3b8;
+}
+
+
+
