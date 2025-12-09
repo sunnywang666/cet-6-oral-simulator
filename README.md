@@ -46,7 +46,7 @@
    
    创建 `.env.local` 文件，添加你的 Gemini API Key：
    ```
-   GEMINI_API_KEY=your_api_key_here
+   VITE_GEMINI_API_KEY=your_api_key_here
    ```
    
    > 获取 API Key：访问 [Google AI Studio](https://makersuite.google.com/app/apikey)

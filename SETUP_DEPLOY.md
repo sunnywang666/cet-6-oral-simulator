@@ -13,7 +13,7 @@
 
 3. 填写信息：
    - **Name**: `GEMINI_API_KEY`
-   - **Secret**: `AIzaSyBJwZbwagHUbZFKoiArwMI22TmHgEoz9po`
+   - **Secret**: `YOUR_GEMINI_API_KEY`
 
 4. 点击 **"Add secret"**
 
@@ -55,7 +55,7 @@ https://sunnywang666.github.io/cet-6-oral-simulator/
 
 - ⏱️ 首次部署需要 3-5 分钟
 - 🔄 之后每次推送代码会自动重新部署
-- 🔑 API Key 已配置在代码中作为 fallback，即使不配置 Secret 也能工作（但推荐配置 Secret）
+- 🔑 需要配置 Secret 或在本地 `.env` 中注入 `VITE_GEMINI_API_KEY`，前端不再内置 fallback Key
 
 ## 🎉 分享给朋友
 
