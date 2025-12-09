@@ -34,7 +34,7 @@
 2. **添加 Secret**：
    - 点击 "New repository secret"
    - Name: `GEMINI_API_KEY`
-   - Secret: `AIzaSyBJwZbwagHUbZFKoiArwMI22TmHgEoz9po`
+   - Secret: `YOUR_GEMINI_API_KEY`
    - 点击 "Add secret"
 
 ### 步骤 3: 重新运行工作流

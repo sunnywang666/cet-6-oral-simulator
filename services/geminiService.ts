@@ -3,21 +3,19 @@ import { ExamResult, Part2Data, Part3Data, RealExamTopic, ExamMode, Message } fr
 
 const MODEL_NAME = 'gemini-2.5-flash';
 
-// Get API key from environment variable (build-time injection) or fallback to default
-// For GitHub Pages deployment, API key will be injected during build via GitHub Secrets
+// Retrieve API key from environment (build-time injection). No hardcoded fallback to avoid leaks.
 const getApiKey = (): string => {
-  // First try environment variable (for build-time injection via GitHub Secrets)
-  if (process.env.API_KEY && process.env.API_KEY !== 'undefined' && process.env.API_KEY !== '') {
-    return process.env.API_KEY;
+  const envKey =
+    // Prefer Vite-style public env var
+    (typeof import.meta !== "undefined" && import.meta.env?.VITE_GEMINI_API_KEY) ||
+    // Legacy support for process.env injection via Vite define
+    (typeof process !== "undefined" ? process.env?.GEMINI_API_KEY : undefined);
+
+  if (typeof envKey === "string" && envKey.trim() && envKey !== "undefined") {
+    return envKey.trim();
   }
-  if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'undefined' && process.env.GEMINI_API_KEY !== '') {
-    return process.env.GEMINI_API_KEY;
-  }
-  
-  // Fallback: Use default API key for direct sharing (embedded in build)
-  // This allows friends to use the app without configuration
-  // Note: In production, this should be set via GitHub Secrets
-  return 'AIzaSyCA7YGsUo95mqKn6zzsT0i5GQypTodEFUM';
+
+  throw new Error("Gemini API key is not configured. Please set VITE_GEMINI_API_KEY before building.");
 };
 
 // Get or create AI instance with API key

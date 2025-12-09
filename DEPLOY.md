@@ -14,14 +14,14 @@
    - 进入仓库 → Settings → Secrets and variables → Actions
    - 点击 "New repository secret"
    - Name: `GEMINI_API_KEY`
-   - Value: 你的 Gemini API Key（例如：`AIzaSyCA7YGsUo95mqKn6zzsT0i5GQypTodEFUM`）
+   - Value: 你的 Gemini API Key（例如：`YOUR_GEMINI_API_KEY`）
    - 点击 "Add secret"
 
 2. GitHub Actions 会自动在构建时注入 API Key：
    - 工作流文件 `.github/workflows/deploy.yml` 已配置
    - 构建时会从 GitHub Secrets 读取 `GEMINI_API_KEY`
-   - 如果未设置 Secret，会使用默认的 fallback API Key
-   - API Key 在构建时注入到代码中，不会暴露在源代码中
+   - 如果未设置 Secret，前端将无法调用 Gemini API，需要手动提供 Key
+   - API Key 仅在构建时注入，不会存储在仓库文件中
 
 3. 验证配置：
    - 推送代码后，GitHub Actions 会自动运行
@@ -62,7 +62,7 @@
 
 **重要提示**：
 - Secret 名称必须为 `GEMINI_API_KEY`（与工作流文件中的配置一致）
-- 如果未设置 Secret，构建时会使用默认的 fallback API Key
+- 项目不再提供硬编码的 fallback API Key，请务必配置 Secret 或在本地 `.env` 中设置
 - Secret 只在构建时使用，不会暴露在公开的代码中
 
 ### 步骤 4：推送代码
@@ -89,7 +89,7 @@ git push -u origin main
 
 ```bash
 # 设置环境变量（Windows PowerShell）
-$env:GEMINI_API_KEY="你的API密钥"
+$env:VITE_GEMINI_API_KEY="你的API密钥"
 npm run build
 ```
 
@@ -108,9 +108,9 @@ npm run build
 1. **API Key 安全**：
    - ✅ **已实现**：使用 GitHub Secrets 在构建时注入 API Key
    - ✅ 工作流文件已配置：`.github/workflows/deploy.yml`
-   - ✅ Vite 配置已设置：`vite.config.ts` 会读取 `GEMINI_API_KEY` 环境变量
+   - ✅ Vite 配置已设置：`vite.config.ts` 会读取 `VITE_GEMINI_API_KEY` 环境变量
    - ❌ 不要将 `.env.local` 提交到 Git
-   - ❌ 不要在代码中硬编码 API Key（fallback key 仅用于开发测试）
+   - ❌ 不要在代码中硬编码 API Key（已移除 fallback key，避免泄露）
    - 💡 可选：考虑让用户自己输入 API Key（最安全）
 
 2. **仓库名称**：
@@ -138,7 +138,7 @@ vercel
 1. 连接 GitHub 仓库
 2. Build command: `npm run build`
 3. Publish directory: `dist`
-4. 添加环境变量：`GEMINI_API_KEY`
+4. 添加环境变量：`VITE_GEMINI_API_KEY`
 
 ### 自定义域名
 在 `vite.config.ts` 中设置 `base: '/'` 即可使用自定义域名。
