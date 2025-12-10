@@ -5,6 +5,10 @@ import react from '@vitejs/plugin-react';
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
     const geminiKey = env.VITE_GEMINI_API_KEY || env.GEMINI_API_KEY;
+
+    if (mode === 'production' && (!geminiKey || geminiKey === 'undefined')) {
+      throw new Error('GEMINI_API_KEY (or VITE_GEMINI_API_KEY) must be provided for production builds.');
+    }
     return {
       server: {
         port: 3000,

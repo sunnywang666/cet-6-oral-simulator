@@ -20,6 +20,7 @@
 2. GitHub Actions 会自动在构建时注入 API Key：
    - 工作流文件 `.github/workflows/deploy.yml` 已配置
    - 构建时会从 GitHub Secrets 读取 `GEMINI_API_KEY`
+   - 未设置 Secret 时，生产构建会直接失败，避免构建出没有 Key 的产物
    - 如果未设置 Secret，前端将无法调用 Gemini API，需要手动提供 Key
    - API Key 仅在构建时注入，不会存储在仓库文件中
 
