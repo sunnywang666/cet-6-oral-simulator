@@ -3,19 +3,24 @@ import { ExamResult, Part2Data, Part3Data, RealExamTopic, ExamMode, Message } fr
 
 const MODEL_NAME = 'gemini-2.5-flash';
 
-// Retrieve API key from environment (build-time injection). No hardcoded fallback to avoid leaks.
+// Retrieve API key from environment (build-time injection).
+// Security baseline: no hardcoded fallback key in source code.
 const getApiKey = (): string => {
   const envKey =
-    // Prefer Vite-style public env var
-    (typeof import.meta !== "undefined" && import.meta.env?.VITE_GEMINI_API_KEY) ||
-    // Legacy support for process.env injection via Vite define
-    (typeof process !== "undefined" ? process.env?.GEMINI_API_KEY : undefined);
+    typeof import.meta !== "undefined" ? import.meta.env?.VITE_GEMINI_API_KEY : undefined;
 
-  if (typeof envKey === "string" && envKey.trim() && envKey !== "undefined") {
-    return envKey.trim();
+  if (typeof envKey !== "string") {
+    throw new Error("Gemini API key is not configured. Please set VITE_GEMINI_API_KEY before building.");
   }
 
-  throw new Error("Gemini API key is not configured. Please set VITE_GEMINI_API_KEY before building.");
+  const apiKey = envKey.trim();
+  const isPlaceholder = ["YOUR_GEMINI_API_KEY", "YOUR_API_KEY", "undefined", "null", "test", "demo"].includes(apiKey);
+
+  if (!apiKey || isPlaceholder) {
+    throw new Error("Gemini API key is invalid. Please provide a real VITE_GEMINI_API_KEY.");
+  }
+
+  return apiKey;
 };
 
 // Get or create AI instance with API key
