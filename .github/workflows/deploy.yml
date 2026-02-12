@@ -33,7 +33,9 @@ jobs:
       
       - name: Build
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          VITE_AI_PROVIDER: zhipu
+          VITE_ZHIPU_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
+          VITE_BASE_PATH: /
         run: npm run build
       
       - name: Setup Pages
