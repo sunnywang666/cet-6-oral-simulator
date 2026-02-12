@@ -1,22 +1,39 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+// 使用代理服务器的 Gemini Service
+// 如果 Gemini API 无法直接访问，使用这个版本
+
 import { ExamMode, RealExamTopic, Part2Data, Part3Data, ExamResult, Message, PracticePart } from '../types';
 
+// 代理服务器地址（需要根据实际部署修改）
+// 如果代理服务器和前端在同一域名下，可以使用相对路径 '/api'
+// 如果是不同端口，使用 'http://localhost:3001' 或完整 URL
+const PROXY_BASE_URL = import.meta.env.VITE_PROXY_URL || '/api';
+
 /**
- * Retrieves the API key from the Vite environment variables.
- * Throws an error if the API key is not configured.
- *
- * @throws {Error} When the API key is not found in the environment variables.
- * @returns {string} The API key.
+ * 通过代理服务器调用 Gemini API
  */
-function getApiKey() {
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY;
-    if (!apiKey) {
-        throw new Error('API key is not configured. Please set VITE_GEMINI_API_KEY or GEMINI_API_KEY in your environment variables.');
+async function callGeminiProxy(prompt: string, model: string = 'gemini-2.0-flash'): Promise<string> {
+    try {
+        const response = await fetch(`${PROXY_BASE_URL}/api/gemini/generate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ prompt, model }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Proxy server error: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data.text;
+    } catch (error) {
+        console.error('Proxy API Error:', error);
+        throw error;
     }
-    return apiKey;
 }
 
-// Real exam topics data
+// Real exam topics data (same as original)
 export const REAL_EXAM_TOPICS: RealExamTopic[] = [
     {
         id: 1,
@@ -66,22 +83,9 @@ export const REAL_EXAM_TOPICS: RealExamTopic[] = [
 ];
 
 /**
- * GeminiService - Handles all interactions with Google Gemini API
+ * GeminiService - 使用代理服务器的版本
  */
 export class GeminiService {
-    private static client: GoogleGenerativeAI | null = null;
-
-    /**
-     * Initialize the Gemini client
-     */
-    private static getClient(): GoogleGenerativeAI {
-        if (!this.client) {
-            const apiKey = getApiKey();
-            this.client = new GoogleGenerativeAI(apiKey);
-        }
-        return this.client;
-    }
-
     /**
      * Get a random real exam topic
      */
@@ -95,16 +99,11 @@ export class GeminiService {
      */
     static async getPart2Data(examMode: ExamMode, realTopic?: RealExamTopic): Promise<Part2Data> {
         if (examMode === ExamMode.REAL && realTopic) {
-            // Use real exam topic data
             return {
                 topic: realTopic.name,
                 question: realTopic.part2Question
             };
         }
-
-        // Generate using AI for simulation mode
-        const client = this.getClient();
-        const model = client.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
         const prompt = `Generate a Part 2 question for CET-6 oral exam. 
         Part 2 is a short Q&A section. 
@@ -116,11 +115,7 @@ export class GeminiService {
         }`;
 
         try {
-            const result = await model.generateContent(prompt);
-            const response = await result.response;
-            const text = response.text();
-            
-            // Extract JSON from response
+            const text = await callGeminiProxy(prompt);
             const jsonMatch = text.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
                 const data = JSON.parse(jsonMatch[0]);
@@ -129,18 +124,10 @@ export class GeminiService {
                     question: data.question || "Please share your thoughts."
                 };
             }
-            
-            // Fallback
-            return {
-                topic: "General Topic",
-                question: "Please share your thoughts on this topic."
-            };
+            return { topic: "General Topic", question: "Please share your thoughts on this topic." };
         } catch (error) {
             console.error('Error generating Part 2 data:', error);
-            return {
-                topic: "General Topic",
-                question: "Please share your thoughts on this topic."
-            };
+            return { topic: "General Topic", question: "Please share your thoughts on this topic." };
         }
     }
 
@@ -149,16 +136,11 @@ export class GeminiService {
      */
     static async getPart3Data(examMode: ExamMode, realTopic?: RealExamTopic): Promise<Part3Data> {
         if (examMode === ExamMode.REAL && realTopic) {
-            // Use real exam topic data
             return {
                 title: realTopic.part3Title,
                 quote: realTopic.part3Quote
             };
         }
-
-        // Generate using AI for simulation mode
-        const client = this.getClient();
-        const model = client.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
         const prompt = `Generate a Part 3 card for CET-6 oral exam.
         Part 3 is a presentation section with a title and a quote.
@@ -169,11 +151,7 @@ export class GeminiService {
         }`;
 
         try {
-            const result = await model.generateContent(prompt);
-            const response = await result.response;
-            const text = response.text();
-            
-            // Extract JSON from response
+            const text = await callGeminiProxy(prompt);
             const jsonMatch = text.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
                 const data = JSON.parse(jsonMatch[0]);
@@ -182,23 +160,15 @@ export class GeminiService {
                     quote: data.quote || "A relevant quote."
                 };
             }
-            
-            // Fallback
-            return {
-                title: "General Topic",
-                quote: "A relevant quote."
-            };
+            return { title: "General Topic", quote: "A relevant quote." };
         } catch (error) {
             console.error('Error generating Part 3 data:', error);
-            return {
-                title: "General Topic",
-                quote: "A relevant quote."
-            };
+            return { title: "General Topic", quote: "A relevant quote." };
         }
     }
 
     /**
-     * Get Part 5 question (in-depth Q&A)
+     * Get Part 5 question
      */
     static async getPart5Question(
         examMode: ExamMode, 
@@ -206,13 +176,8 @@ export class GeminiService {
         part2Topic?: string
     ): Promise<string> {
         if (examMode === ExamMode.REAL && realTopic) {
-            // Use real exam topic data
             return realTopic.part5Question;
         }
-
-        // Generate using AI for simulation mode
-        const client = this.getClient();
-        const model = client.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
         const topicContext = part2Topic || "general topics";
         const prompt = `Generate a Part 5 in-depth question for CET-6 oral exam.
@@ -221,10 +186,8 @@ export class GeminiService {
         Return ONLY the question text, no additional explanation.`;
 
         try {
-            const result = await model.generateContent(prompt);
-            const response = await result.response;
-            const text = response.text().trim();
-            return text || "What are your thoughts on this topic?";
+            const text = await callGeminiProxy(prompt);
+            return text.trim() || "What are your thoughts on this topic?";
         } catch (error) {
             console.error('Error generating Part 5 question:', error);
             return "What are your thoughts on this topic?";
@@ -232,17 +195,13 @@ export class GeminiService {
     }
 
     /**
-     * Generate Part 4 turn (AI partner's response in discussion)
+     * Generate Part 4 turn
      */
     static async generatePart4Turn(
         historyContext: Message[],
         topicContext: string,
         lastUserText?: string
     ): Promise<string> {
-        const client = this.getClient();
-        const model = client.getGenerativeModel({ model: 'gemini-2.0-flash' });
-
-        // Build conversation history
         const conversationHistory = historyContext
             .map(msg => {
                 if (msg.role === 'user') {
@@ -266,9 +225,8 @@ export class GeminiService {
         Do NOT include any prefixes like "[Part 4 Partner]:" - just return your response directly.`;
 
         try {
-            const result = await model.generateContent(prompt);
-            const response = await result.response;
-            return response.text().trim();
+            const text = await callGeminiProxy(prompt);
+            return text.trim();
         } catch (error) {
             console.error('Error generating Part 4 turn:', error);
             return "That's an interesting point. Could you tell me more about that?";
@@ -284,38 +242,12 @@ export class GeminiService {
     ): Promise<ExamResult> {
         console.log('GeminiService.generateReport called with', messages.length, 'messages');
         
-        // Check API key first
-        try {
-            const apiKey = getApiKey();
-            if (!apiKey || apiKey === 'undefined') {
-                throw new Error('API key is not configured');
-            }
-            console.log('API key found, length:', apiKey.length);
-        } catch (error) {
-            console.error('API key error:', error);
-            throw error;
-        }
-        
-        const client = this.getClient();
-        // Use gemini-pro for evaluation
-        const model = client.getGenerativeModel({ model: 'gemini-2.0-flash' });
-
-        // Extract part-specific messages
         const part1Messages = messages.filter(m => m.text.includes('[Part 1]'));
         const part2Messages = messages.filter(m => m.text.includes('[Part 2]'));
         const part3Messages = messages.filter(m => m.text.includes('[Part 3]'));
         const part4Messages = messages.filter(m => m.text.includes('[Part 4]'));
         const part5Messages = messages.filter(m => m.text.includes('[Part 5]'));
-        
-        console.log('Extracted messages:', {
-            part1: part1Messages.length,
-            part2: part2Messages.length,
-            part3: part3Messages.length,
-            part4: part4Messages.length,
-            part5: part5Messages.length
-        });
 
-        // Build prompt for evaluation
         const partsToEvaluate = practicePart 
             ? [practicePart] 
             : ['PART1', 'PART2', 'PART3', 'PART4', 'PART5'];
@@ -390,20 +322,12 @@ For parts not evaluated, use:
 }`;
 
         try {
-            console.log('Sending evaluation prompt to Gemini API...');
-            console.log('Prompt length:', evaluationPrompt.length);
+            console.log('Sending evaluation prompt to proxy server...');
+            const text = await callGeminiProxy(evaluationPrompt);
             
-            const result = await model.generateContent(evaluationPrompt);
-            const response = await result.response;
-            const text = response.text();
+            console.log('Received response from proxy, length:', text.length);
             
-            console.log('Received response from Gemini, length:', text.length);
-            console.log('Response preview:', text.substring(0, 200));
-            
-            // Try multiple methods to extract JSON
             let data: any = null;
-            
-            // Method 1: Try to find JSON object
             const jsonMatch = text.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
                 try {
@@ -411,42 +335,17 @@ For parts not evaluated, use:
                     console.log('Successfully parsed JSON from response');
                 } catch (parseError) {
                     console.error('Failed to parse JSON:', parseError);
-                    console.log('JSON string:', jsonMatch[0].substring(0, 500));
-                }
-            }
-            
-            // Method 2: If no JSON found, try to extract from code blocks
-            if (!data) {
-                const codeBlockMatch = text.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
-                if (codeBlockMatch) {
-                    try {
-                        data = JSON.parse(codeBlockMatch[1]);
-                        console.log('Successfully parsed JSON from code block');
-                    } catch (parseError) {
-                        console.error('Failed to parse JSON from code block:', parseError);
-                    }
-                }
-            }
-            
-            // Method 3: Try parsing the entire response as JSON
-            if (!data) {
-                try {
-                    data = JSON.parse(text.trim());
-                    console.log('Successfully parsed entire response as JSON');
-                } catch (parseError) {
-                    console.error('Failed to parse entire response as JSON:', parseError);
                 }
             }
             
             if (data) {
-                // Ensure all required parts exist
                 const defaultFeedback = {
                     originalText: "",
                     feedback: practicePart ? "Not evaluated in this practice session" : "",
                     score: 0
                 };
 
-                const result = {
+                return {
                     totalGrade: data.totalGrade || 'C',
                     part1Feedback: data.part1Feedback || defaultFeedback,
                     part2Feedback: data.part2Feedback || defaultFeedback,
@@ -456,28 +355,17 @@ For parts not evaluated, use:
                     highFreqErrors: data.highFreqErrors || [],
                     generalAdvice: data.generalAdvice || "Keep practicing to improve your oral English skills."
                 };
-                
-                console.log('Successfully generated report:', result);
-                return result;
             }
             
-            // If all parsing methods failed
-            console.error('Failed to extract JSON from response. Full response:', text);
             throw new Error(`Failed to parse evaluation response. Response: ${text.substring(0, 200)}`);
             
         } catch (error: any) {
             console.error('Error generating report:', error);
-            console.error('Error details:', {
-                message: error?.message,
-                stack: error?.stack,
-                name: error?.name
-            });
             
-            // Return default result on error with more details
             const errorMessage = error?.message || 'Unknown error';
             const defaultFeedback = {
                 originalText: "",
-                feedback: `Evaluation failed: ${errorMessage}. Please check your API key and try again.`,
+                feedback: `Evaluation failed: ${errorMessage}. Please check your proxy server configuration.`,
                 score: 0
             };
 
@@ -489,7 +377,7 @@ For parts not evaluated, use:
                 part4Feedback: defaultFeedback,
                 part5Feedback: defaultFeedback,
                 highFreqErrors: [],
-                generalAdvice: `An error occurred during evaluation: ${errorMessage}. Please check your API key configuration and network connection.`
+                generalAdvice: `An error occurred during evaluation: ${errorMessage}. Please check your proxy server and network connection.`
             };
         }
     }

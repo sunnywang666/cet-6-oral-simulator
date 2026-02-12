@@ -1,0 +1,18 @@
+{
+  "name": "gemini-proxy-server",
+  "version": "1.0.0",
+  "description": "Proxy server for Gemini API to bypass network restrictions",
+  "main": "proxy-server.js",
+  "scripts": {
+    "start": "node proxy-server.js",
+    "dev": "nodemon proxy-server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "@google/generative-ai": "^0.24.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

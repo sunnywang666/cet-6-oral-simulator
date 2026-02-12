@@ -1,7 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Mic, MicOff, Play, BookOpen, User, Users, FileText, Ear, Volume2, UserCircle2, AlertCircle, Sparkles, CheckCircle2, GraduationCap, BrainCircuit, PauseCircle, SkipForward, History, Download, Trash2, ChevronLeft, Eye } from 'lucide-react';
 import { ExamStage, Message, Part2Data, Part3Data, ExamResult, ExamMode, RealExamTopic, ExamRecord, ExamType, PracticePart } from './types';
-import { GeminiService, REAL_EXAM_TOPICS } from './services/geminiService';
+// 根据环境变量选择使用哪个 AI 服务
+// VITE_AI_PROVIDER 可以是: 'zhipu' (智谱), 'gemini' (Google Gemini), 'gemini-proxy' (Gemini 代理)
+import { GeminiService as GeminiServiceZhipu, REAL_EXAM_TOPICS as REAL_EXAM_TOPICS_ZHIPU } from './services/zhipuService';
+import { GeminiService as GeminiServiceDirect, REAL_EXAM_TOPICS as REAL_EXAM_TOPICS_DIRECT } from './services/geminiService';
+import { GeminiService as GeminiServiceProxy, REAL_EXAM_TOPICS as REAL_EXAM_TOPICS_PROXY } from './services/geminiServiceProxy';
+
+const aiProvider = import.meta.env.VITE_AI_PROVIDER || 'zhipu';
+
+// 根据环境变量选择使用哪个服务
+const GeminiService = aiProvider === 'zhipu' 
+    ? GeminiServiceZhipu 
+    : (aiProvider === 'gemini-proxy' ? GeminiServiceProxy : GeminiServiceDirect);
+
+const REAL_EXAM_TOPICS = aiProvider === 'zhipu'
+    ? REAL_EXAM_TOPICS_ZHIPU
+    : (aiProvider === 'gemini-proxy' ? REAL_EXAM_TOPICS_PROXY : REAL_EXAM_TOPICS_DIRECT);
 import { StorageService } from './services/storageService';
 import { PunctuationService } from './services/punctuationService';
 import { useSpeech, useTTS } from './hooks/useSpeech';
@@ -858,9 +873,11 @@ const App: React.FC = () => {
       
       // Save current text based on current stage
       const currentStage = stage;
-      let textSaved = false;
       
       // CRITICAL: Use setMessages with function to get latest messages and check/save text
+      // Use a flag to track if we saved text
+      let textWasSaved = false;
+      
       setMessages(currentMessages => {
         console.log("Current messages in finishExam:", currentMessages);
         
@@ -874,7 +891,7 @@ const App: React.FC = () => {
                 const metrics = getSpeechMetrics();
                 console.log("Saving Part 1 text on early finish (with punctuation):", processedText);
                 console.log("Part 1 speech metrics:", metrics);
-                textSaved = true;
+                textWasSaved = true;
                 return [...currentMessages, { role: 'user' as const, text: `[Part 1] ${processedText}`, timestamp: Date.now(), ...(metrics && { speechMetrics: metrics }) }];
               }
               break;
@@ -885,7 +902,7 @@ const App: React.FC = () => {
                 const metrics = getSpeechMetrics();
                 console.log("Saving Part 2 text on early finish (with punctuation):", processedText);
                 console.log("Part 2 speech metrics:", metrics);
-                textSaved = true;
+                textWasSaved = true;
                 return [...currentMessages, { role: 'user' as const, text: `[Part 2] ${processedText}`, timestamp: Date.now(), ...(metrics && { speechMetrics: metrics }) }];
               }
               break;
@@ -896,7 +913,7 @@ const App: React.FC = () => {
                 const metrics = getSpeechMetrics();
                 console.log("Saving Part 3 text on early finish (with punctuation):", processedText);
                 console.log("Part 3 speech metrics:", metrics);
-                textSaved = true;
+                textWasSaved = true;
                 return [...currentMessages, { role: 'user' as const, text: `[Part 3] ${processedText}`, timestamp: Date.now(), ...(metrics && { speechMetrics: metrics }) }];
               }
               break;
@@ -909,7 +926,7 @@ const App: React.FC = () => {
                   const metrics = getSpeechMetrics();
                   console.log("Saving Part 4 text on early finish (with punctuation):", processedText);
                   console.log("Part 4 speech metrics:", metrics);
-                  textSaved = true;
+                  textWasSaved = true;
                   return [...currentMessages, { role: 'user' as const, text: `[Part 4 End] ${processedText}`, timestamp: Date.now(), ...(metrics && { speechMetrics: metrics }) }];
                 }
               }
@@ -921,7 +938,7 @@ const App: React.FC = () => {
                 const metrics = getSpeechMetrics();
                 console.log("Saving Part 5 text on early finish (with punctuation):", processedText);
                 console.log("Part 5 speech metrics:", metrics);
-                textSaved = true;
+                textWasSaved = true;
                 return [...currentMessages, { role: 'user' as const, text: `[Part 5] ${processedText}`, timestamp: Date.now(), ...(metrics && { speechMetrics: metrics }) }];
               }
               break;
@@ -932,15 +949,21 @@ const App: React.FC = () => {
         return currentMessages;
       });
       
-      // Wait a bit more to ensure message is added, then get final messages
+      // Wait longer to ensure all messages are saved (setState is async)
+      // Use a longer delay to ensure setState completes
       setTimeout(() => {
         // CRITICAL: Use setMessages with function to get the LATEST messages (after any updates)
         setMessages(finalMessages => {
           console.log("Final messages for report:", finalMessages);
           console.log("Messages count:", finalMessages.length);
+          console.log("Messages content:", finalMessages.map(m => ({ role: m.role, text: m.text.substring(0, 50) + '...' })));
           
-          // Check if we have any messages to generate report
-          if (finalMessages.length === 0) {
+          // Filter out system messages for checking
+          const userMessages = finalMessages.filter(m => m.role === 'user');
+          console.log("User messages count:", userMessages.length);
+          
+          // Check if we have any user messages to generate report
+          if (userMessages.length === 0) {
             console.warn("No messages found, cannot generate report");
             // Still show report with error message
             setStage(ExamStage.REPORT);
@@ -1001,7 +1024,15 @@ const App: React.FC = () => {
           // Generate Result with error handling
           (async () => {
             try {
-              console.log("Starting report generation...");
+              console.log("Starting report generation with", finalMessages.length, "messages");
+              console.log("Message breakdown:", {
+                part1: finalMessages.filter(m => m.text.includes('[Part 1]')).length,
+                part2: finalMessages.filter(m => m.text.includes('[Part 2]')).length,
+                part3: finalMessages.filter(m => m.text.includes('[Part 3]')).length,
+                part4: finalMessages.filter(m => m.text.includes('[Part 4]')).length,
+                part5: finalMessages.filter(m => m.text.includes('[Part 5]')).length
+              });
+              
               // For practice mode, only evaluate the practiced part
               const practicePartToEvaluate = (examType === ExamType.PRACTICE && practicePart) ? practicePart : undefined;
               const res = await GeminiService.generateReport(finalMessages, practicePartToEvaluate);
@@ -1088,7 +1119,7 @@ const App: React.FC = () => {
           // Return unchanged (we're just using this to get latest value)
           return finalMessages;
         });
-      }, textSaved ? 300 : 200); // Wait longer if we just saved text
+      }, 1000); // Wait 1 second to ensure all setState operations complete (setState is async)
     }, 300); // Wait for text to be captured
   };
 
