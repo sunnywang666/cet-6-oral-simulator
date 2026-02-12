@@ -49,12 +49,16 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: 22
           script: |
-            # 复制文件到 Docker 容器
-            docker cp /root/20260210201653_20260212182854/index.html 20260210201653_20260212182854-web-1:/usr/share/nginx/html/
-            docker cp /root/20260210201653_20260212182854/assets 20260210201653_20260212182854-web-1:/usr/share/nginx/html/
+            echo "Starting Docker container file copy..."
             
-            # 或者直接复制整个目录（如果容器支持）
-            # docker exec 20260210201653_20260212182854-web-1 rm -rf /usr/share/nginx/html/*
-            # docker cp /root/20260210201653_20260212182854/. 20260210201653_20260212182854-web-1:/usr/share/nginx/html/
+            # 确保目录存在
+            mkdir -p /root/20260210201653_20260212182854
+            
+            # 复制所有文件到 Docker 容器
+            docker cp /root/20260210201653_20260212182854/. 20260210201653_20260212182854-web-1:/usr/share/nginx/html/
+            
+            # 验证文件是否复制成功
+            docker exec 20260210201653_20260212182854-web-1 ls -la /usr/share/nginx/html/
             
             echo "Deployment completed successfully!"
+            echo "Website should be available at https://cet6-simulator.com"
