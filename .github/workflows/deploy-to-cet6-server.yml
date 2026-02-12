@@ -1,0 +1,60 @@
+name: Deploy to cet6-simulator.com
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build project
+        env:
+          VITE_AI_PROVIDER: zhipu
+          VITE_ZHIPU_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
+          VITE_BASE_PATH: /
+        run: npm run build
+      
+      - name: Deploy to server via SSH
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: 62.234.55.246
+          username: root
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: 22
+          source: "dist/*"
+          target: /root/20260210201653_20260212182854/
+          strip_components: 1
+          rm: false
+      
+      - name: Copy files to Docker container
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 62.234.55.246
+          username: root
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: 22
+          script: |
+            # 复制文件到 Docker 容器
+            docker cp /root/20260210201653_20260212182854/index.html 20260210201653_20260212182854-web-1:/usr/share/nginx/html/
+            docker cp /root/20260210201653_20260212182854/assets 20260210201653_20260212182854-web-1:/usr/share/nginx/html/
+            
+            # 或者直接复制整个目录（如果容器支持）
+            # docker exec 20260210201653_20260212182854-web-1 rm -rf /usr/share/nginx/html/*
+            # docker cp /root/20260210201653_20260212182854/. 20260210201653_20260212182854-web-1:/usr/share/nginx/html/
+            
+            echo "Deployment completed successfully!"
