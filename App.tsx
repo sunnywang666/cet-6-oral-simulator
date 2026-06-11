@@ -1,22 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Mic, MicOff, Play, BookOpen, User, Users, FileText, Ear, Volume2, UserCircle2, AlertCircle, Sparkles, CheckCircle2, GraduationCap, BrainCircuit, PauseCircle, SkipForward, History, Download, Trash2, ChevronLeft, Eye } from 'lucide-react';
 import { ExamStage, Message, Part2Data, Part3Data, ExamResult, ExamMode, RealExamTopic, ExamRecord, ExamType, PracticePart } from './types';
-// 根据环境变量选择使用哪个 AI 服务
-// VITE_AI_PROVIDER 可以是: 'zhipu' (智谱), 'gemini' (Google Gemini), 'gemini-proxy' (Gemini 代理)
-import { GeminiService as GeminiServiceZhipu, REAL_EXAM_TOPICS as REAL_EXAM_TOPICS_ZHIPU } from './services/zhipuService';
-import { GeminiService as GeminiServiceDirect, REAL_EXAM_TOPICS as REAL_EXAM_TOPICS_DIRECT } from './services/geminiService';
-import { GeminiService as GeminiServiceProxy, REAL_EXAM_TOPICS as REAL_EXAM_TOPICS_PROXY } from './services/geminiServiceProxy';
-
-const aiProvider = import.meta.env.VITE_AI_PROVIDER || 'zhipu';
+// AI provider facade. Defaults to Zhipu; set VITE_AI_PROVIDER=gemini to use Gemini.
+import { GeminiService, REAL_EXAM_TOPICS } from './services/aiService';
 
 // 根据环境变量选择使用哪个服务
-const GeminiService = aiProvider === 'zhipu' 
-    ? GeminiServiceZhipu 
-    : (aiProvider === 'gemini-proxy' ? GeminiServiceProxy : GeminiServiceDirect);
-
-const REAL_EXAM_TOPICS = aiProvider === 'zhipu'
-    ? REAL_EXAM_TOPICS_ZHIPU
-    : (aiProvider === 'gemini-proxy' ? REAL_EXAM_TOPICS_PROXY : REAL_EXAM_TOPICS_DIRECT);
 import { StorageService } from './services/storageService';
 import { PunctuationService } from './services/punctuationService';
 import { useSpeech, useTTS } from './hooks/useSpeech';

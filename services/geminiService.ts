@@ -9,9 +9,9 @@ import { ExamMode, RealExamTopic, Part2Data, Part3Data, ExamResult, Message, Pra
  * @returns {string} The API key.
  */
 function getApiKey() {
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY;
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
     if (!apiKey) {
-        throw new Error('API key is not configured. Please set VITE_GEMINI_API_KEY or GEMINI_API_KEY in your environment variables.');
+        throw new Error('API key is not configured. Please set VITE_GEMINI_API_KEY in your environment variables.');
     }
     return apiKey;
 }
@@ -104,7 +104,7 @@ export class GeminiService {
 
         // Generate using AI for simulation mode
         const client = this.getClient();
-        const model = client.getGenerativeModel({ model: 'gemini-2.0-flash' });
+        const model = client.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
         const prompt = `Generate a Part 2 question for CET-6 oral exam. 
         Part 2 is a short Q&A section. 
@@ -158,7 +158,7 @@ export class GeminiService {
 
         // Generate using AI for simulation mode
         const client = this.getClient();
-        const model = client.getGenerativeModel({ model: 'gemini-2.0-flash' });
+        const model = client.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
         const prompt = `Generate a Part 3 card for CET-6 oral exam.
         Part 3 is a presentation section with a title and a quote.
@@ -212,7 +212,7 @@ export class GeminiService {
 
         // Generate using AI for simulation mode
         const client = this.getClient();
-        const model = client.getGenerativeModel({ model: 'gemini-2.0-flash' });
+        const model = client.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
         const topicContext = part2Topic || "general topics";
         const prompt = `Generate a Part 5 in-depth question for CET-6 oral exam.
@@ -240,7 +240,7 @@ export class GeminiService {
         lastUserText?: string
     ): Promise<string> {
         const client = this.getClient();
-        const model = client.getGenerativeModel({ model: 'gemini-2.0-flash' });
+        const model = client.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
         // Build conversation history
         const conversationHistory = historyContext
@@ -298,7 +298,7 @@ export class GeminiService {
         
         const client = this.getClient();
         // Use gemini-pro for evaluation
-        const model = client.getGenerativeModel({ model: 'gemini-2.0-flash' });
+        const model = client.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
         // Extract part-specific messages
         const part1Messages = messages.filter(m => m.text.includes('[Part 1]'));

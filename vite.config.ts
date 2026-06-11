@@ -4,23 +4,9 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
-
-  // Supports either Zhipu or Gemini API keys.
-  const zhipuKey = env.VITE_ZHIPU_API_KEY || env.ZHIPU_API_KEY;
-  const geminiKey = env.VITE_GEMINI_API_KEY || env.GEMINI_API_KEY;
-  const aiProvider = env.VITE_AI_PROVIDER || 'zhipu';
   const basePath = env.VITE_BASE_PATH && env.VITE_BASE_PATH !== 'undefined'
     ? env.VITE_BASE_PATH
     : '/';
-
-  // Validate the key required by the selected AI provider.
-  if (mode === 'production') {
-    if (aiProvider === 'zhipu' && (!zhipuKey || zhipuKey === 'undefined')) {
-      throw new Error('ZHIPU_API_KEY (or VITE_ZHIPU_API_KEY) must be provided for production builds.');
-    } else if ((aiProvider === 'gemini' || aiProvider === 'gemini-proxy') && (!geminiKey || geminiKey === 'undefined')) {
-      throw new Error('GEMINI_API_KEY (or VITE_GEMINI_API_KEY) must be provided for production builds.');
-    }
-  }
 
   return {
     server: {
@@ -28,13 +14,6 @@ export default defineConfig(({ mode }) => {
       host: '0.0.0.0',
     },
     plugins: [react()],
-    define: {
-      'process.env.GEMINI_API_KEY': JSON.stringify(geminiKey),
-      'import.meta.env.VITE_GEMINI_API_KEY': JSON.stringify(geminiKey),
-      'process.env.ZHIPU_API_KEY': JSON.stringify(zhipuKey),
-      'import.meta.env.VITE_ZHIPU_API_KEY': JSON.stringify(zhipuKey),
-      'import.meta.env.VITE_AI_PROVIDER': JSON.stringify(aiProvider),
-    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

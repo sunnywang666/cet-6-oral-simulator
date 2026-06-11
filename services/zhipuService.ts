@@ -7,9 +7,9 @@ import { ExamMode, RealExamTopic, Part2Data, Part3Data, ExamResult, Message, Pra
  * 获取智谱 API Key
  */
 function getApiKey() {
-    const apiKey = import.meta.env.VITE_ZHIPU_API_KEY || import.meta.env.ZHIPU_API_KEY;
+    const apiKey = import.meta.env.VITE_ZHIPU_API_KEY;
     if (!apiKey) {
-        throw new Error('API key is not configured. Please set VITE_ZHIPU_API_KEY or ZHIPU_API_KEY in your environment variables.');
+        throw new Error('API key is not configured. Please set VITE_ZHIPU_API_KEY in your environment variables.');
     }
     return apiKey;
 }

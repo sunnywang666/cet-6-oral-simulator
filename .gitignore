@@ -11,6 +11,15 @@ node_modules
 dist
 dist-ssr
 *.local
+*.base64
+*.b64
+*.zip
+*.tar.gz
+*_commands.txt
+commands_*.txt
+execute_manually.txt
+single_heredoc_command.txt
+update.tar.gz
 
 # Editor directories and files
 .vscode/*
