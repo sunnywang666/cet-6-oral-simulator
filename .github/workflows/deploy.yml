@@ -1,4 +1,4 @@
-name: CI
+name: Deploy to Server
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -24,3 +24,26 @@ jobs:
       
       - name: Build
         run: npm run build
+
+      - name: Upload dist to Nginx web root
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: 62.234.55.246
+          username: root
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: 22
+          source: "dist/*"
+          target: "/usr/share/nginx/html"
+          strip_components: 1
+          rm: true
+
+      - name: Reload Nginx
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 62.234.55.246
+          username: root
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: 22
+          script: |
+            nginx -t && nginx -s reload || systemctl reload nginx || true
+            ls -la /usr/share/nginx/html
